@@ -76,6 +76,17 @@ const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return !isAuthenticated ? <>{children}</> : <Navigate to="/dashboard" replace />;
 };
 
+const DashboardRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { loading } = useAuth();
+
+  if (loading) {
+    return <LoadingSpinner />;
+  }
+
+  // Always show dashboard, but with different layouts based on auth status
+  return <>{children}</>;
+};
+
 const AppContent: React.FC = () => {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
@@ -99,11 +110,11 @@ const AppContent: React.FC = () => {
         <Route 
           path="/dashboard" 
           element={
-            <ProtectedRoute>
+            <DashboardRoute>
               <Layout>
                 <Dashboard />
               </Layout>
-            </ProtectedRoute>
+            </DashboardRoute>
           } 
         />
         <Route 

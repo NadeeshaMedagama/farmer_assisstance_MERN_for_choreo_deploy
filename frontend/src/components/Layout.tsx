@@ -18,6 +18,9 @@ import {
   Divider,
   useTheme,
   useMediaQuery,
+  Button,
+  Card,
+  CardContent,
 } from '@mui/material';
 import {
   Menu as MenuIcon,
@@ -34,6 +37,7 @@ import {
   Analytics as AnalyticsIcon,
   Settings as SettingsIcon,
   Security as SecurityIcon,
+  Login as LoginIcon,
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -49,7 +53,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, logout } = useAuth();
+  const { user, logout, isAuthenticated } = useAuth();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
@@ -138,6 +142,77 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     </div>
   );
 
+  // If user is not authenticated, show a simple layout with login prompt
+  if (!isAuthenticated) {
+    return (
+      <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+        <CssBaseline />
+        <AppBar position="fixed" sx={{ backgroundColor: 'primary.main' }}>
+          <Toolbar>
+            <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1, color: 'white' }}>
+              🌱 Farmer Assistant
+            </Typography>
+            <Button
+              color="inherit"
+              startIcon={<LoginIcon />}
+              onClick={() => navigate('/login')}
+              sx={{ color: 'white' }}
+            >
+              Login
+            </Button>
+          </Toolbar>
+        </AppBar>
+        
+        <Box
+          component="main"
+          sx={{
+            flexGrow: 1,
+            p: 3,
+            mt: 8,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: 'linear-gradient(135deg, #f5f5f5 0%, #e8f5e8 100%)',
+          }}
+        >
+          <Card sx={{ maxWidth: 600, width: '100%', textAlign: 'center' }}>
+            <CardContent sx={{ p: 4 }}>
+              <Typography variant="h4" component="h1" gutterBottom color="primary">
+                🌱 Welcome to Farmer Assistant
+              </Typography>
+              <Typography variant="h6" color="text.secondary" paragraph>
+                Your comprehensive platform for modern agriculture management
+              </Typography>
+              <Typography variant="body1" color="text.secondary" paragraph>
+                Access weather forecasts, crop management tools, market prices, and connect with fellow farmers.
+              </Typography>
+              <Box sx={{ mt: 3, display: 'flex', gap: 2, justifyContent: 'center' }}>
+                <Button
+                  variant="contained"
+                  size="large"
+                  startIcon={<LoginIcon />}
+                  onClick={() => navigate('/login')}
+                  sx={{ px: 4 }}
+                >
+                  Login to Continue
+                </Button>
+                <Button
+                  variant="outlined"
+                  size="large"
+                  onClick={() => navigate('/register')}
+                  sx={{ px: 4 }}
+                >
+                  Create Account
+                </Button>
+              </Box>
+            </CardContent>
+          </Card>
+        </Box>
+      </Box>
+    );
+  }
+
+  // Authenticated user layout
   return (
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />

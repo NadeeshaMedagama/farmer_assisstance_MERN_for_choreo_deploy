@@ -1,0 +1,133 @@
+apiVersion: wso2.com/v1alpha2
+kind: Component
+metadata:
+  name: farmer-assistance-backend
+  namespace: default
+spec:
+  type: web
+  build:
+    type: dockerfile
+    dockerfilePath: Dockerfile
+  source:
+    type: git
+    url: https://github.com/NadeeshaMedagama/farmer_assisstance_MERN_for_choreo_deploy.git
+    branch: main
+  runtime:
+    type: nodejs
+    version: "18"
+  replicas: 1
+  resources:
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+    requests:
+      memory: "256Mi"
+      cpu: "250m"
+  env:
+    - name: NODE_ENV
+      value: "production"
+    - name: PORT
+      value: "8080"
+    - name: MONGODB_URI
+      valueFrom:
+        secretKeyRef:
+          name: mongodb-secret
+          key: uri
+    - name: JWT_SECRET
+      valueFrom:
+        secretKeyRef:
+          name: jwt-secret
+          key: secret
+    - name: SESSION_SECRET
+      valueFrom:
+        secretKeyRef:
+          name: session-secret
+          key: secret
+  endpoints:
+    - name: farmer-assistance-api
+      port: 8080
+      protocol: http
+      path: /
+      ingress:
+        enabled: true
+        host: farmer-assistance-api.choreo.dev
+        tls:
+          enabled: true
+      cors:
+        enabled: true
+        origins:
+          - "https://farmer-assistance-frontend.choreo.dev"
+          - "http://localhost:3000"
+        methods:
+          - GET
+          - POST
+          - PUT
+          - DELETE
+          - OPTIONS
+        headers:
+          - Content-Type
+          - Authorization
+          - X-Requested-With
+      rateLimit:
+        enabled: true
+        requests: 100
+        window: "1m"
+      healthCheck:
+        enabled: true
+        path: /health
+        interval: 30s
+        timeout: 5s
+        retries: 3
+  scaling:
+    minReplicas: 1
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+  monitoring:
+    enabled: true
+    metrics:
+      enabled: true
+    logging:
+      enabled: true
+      level: info
+  security:
+    enabled: true
+    authentication:
+      enabled: true
+      type: jwt
+    authorization:
+      enabled: true
+      policies:
+        - name: admin-access
+          path: /api/admin/*
+          methods: ["GET", "POST", "PUT", "DELETE"]
+          roles: ["admin"]
+        - name: user-access
+          path: /api/users/*
+          methods: ["GET", "POST", "PUT", "DELETE"]
+          roles: ["user", "admin"]
+        - name: public-access
+          path: /api/auth/*
+          methods: ["POST"]
+          roles: ["anonymous"]
+        - name: health-check
+          path: /health
+          methods: ["GET"]
+          roles: ["anonymous"]
+  volumes:
+    - name: logs
+      mountPath: /app/logs
+      type: emptyDir
+  secrets:
+    - name: mongodb-secret
+      type: opaque
+      data:
+        uri: "mongodb://mongodb:27017/farmer-assistance"
+    - name: jwt-secret
+      type: opaque
+      data:
+        secret: "your-jwt-secret-key-change-in-production"
+    - name: session-secret
+      type: opaque
+      data:
+        secret: "your-session-secret-key-change-in-production"

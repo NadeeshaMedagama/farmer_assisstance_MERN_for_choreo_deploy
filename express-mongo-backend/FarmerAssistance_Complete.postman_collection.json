@@ -1,0 +1,1360 @@
+{
+  "info": {
+    "name": "Farmer Assistance API - Complete Collection",
+    "description": "Complete API collection for Farmer Assistance Backend",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000"
+    },
+    {
+      "key": "token",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Health Check",
+      "item": [
+        {
+          "name": "Server Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["health"]
+            }
+          }
+        },
+        {
+          "name": "API Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "health"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"password123\",\n  \"phone\": \"+1234567890\",\n  \"location\": {\n    \"address\": \"123 Farm St\",\n    \"city\": \"Colombo\",\n    \"state\": \"Western\",\n    \"country\": \"Sri Lanka\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Login User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.token) {",
+                  "        pm.environment.set('token', response.token);",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "me"]
+            }
+          }
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"John Updated\",\n  \"lastName\": \"Doe Updated\",\n  \"phone\": \"+1234567890\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "me"]
+            }
+          }
+        },
+        {
+          "name": "Forgot Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/forgot-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "forgot-password"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Crop Management",
+      "item": [
+        {
+          "name": "Create Crop",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Rice\",\n  \"type\": \"grain\",\n  \"plantingDate\": \"2025-01-15\",\n  \"expectedHarvestDate\": \"2025-10-15\",\n  \"area\": 1000,\n  \"unit\": \"square_meters\",\n  \"location\": {\n    \"city\": \"Colombo\"\n  },\n  \"yield\": {\n    \"expected\": 1000\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/crops",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "crops"]
+            }
+          }
+        },
+        {
+          "name": "List Crops",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/crops",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "crops"]
+            }
+          }
+        },
+        {
+          "name": "Get Crop by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/crops/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "crops", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "CROP_ID_HERE"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Crop",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Rice\",\n  \"status\": \"growing\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/crops/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "crops", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "CROP_ID_HERE"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Crop",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/crops/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "crops", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "CROP_ID_HERE"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Market Prices",
+      "item": [
+        {
+          "name": "List Market Prices",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/market?crop=rice&city=colombo&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "market"],
+              "query": [
+                {
+                  "key": "crop",
+                  "value": "rice"
+                },
+                {
+                  "key": "city",
+                  "value": "colombo"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Add Market Price (Simple)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productName\": \"Rice\",\n  \"price\": 150,\n  \"unit\": \"kg\",\n  \"location\": \"Colombo\",\n  \"date\": \"2025-01-15\",\n  \"source\": \"Market Survey\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/market",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "market"]
+            }
+          }
+        },
+        {
+          "name": "Add Market Price (Complex)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"crop\": {\n    \"name\": \"Rice\",\n    \"type\": \"grain\",\n    \"grade\": \"premium\"\n  },\n  \"location\": {\n    \"market\": \"Colombo Central Market\",\n    \"city\": \"Colombo\",\n    \"state\": \"Western\",\n    \"country\": \"Sri Lanka\"\n  },\n  \"prices\": {\n    \"wholesale\": {\n      \"min\": 120,\n      \"max\": 180,\n      \"average\": 150,\n      \"unit\": \"kg\"\n    }\n  },\n  \"demand\": {\n    \"level\": \"high\",\n    \"trend\": \"increasing\"\n  },\n  \"supply\": {\n    \"level\": \"medium\",\n    \"trend\": \"stable\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/market",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "market"]
+            }
+          }
+        },
+        {
+          "name": "External Market Lookup",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/market/external?name=rice",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "market", "external"],
+              "query": [
+                {
+                  "key": "name",
+                  "value": "rice"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Weather",
+      "item": [
+        {
+          "name": "Get Current Weather",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/weather?lat=6.9271&lon=79.8612&city=Colombo",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "weather"],
+              "query": [
+                {
+                  "key": "lat",
+                  "value": "6.9271"
+                },
+                {
+                  "key": "lon",
+                  "value": "79.8612"
+                },
+                {
+                  "key": "city",
+                  "value": "Colombo"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Historical Weather",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/weather/historical?lat=6.9271&lon=79.8612&days=7",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "weather", "historical"],
+              "query": [
+                {
+                  "key": "lat",
+                  "value": "6.9271"
+                },
+                {
+                  "key": "lon",
+                  "value": "79.8612"
+                },
+                {
+                  "key": "days",
+                  "value": "7"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Weather Statistics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/weather/stats?lat=6.9271&lon=79.8612&days=30",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "weather", "stats"],
+              "query": [
+                {
+                  "key": "lat",
+                  "value": "6.9271"
+                },
+                {
+                  "key": "lon",
+                  "value": "79.8612"
+                },
+                {
+                  "key": "days",
+                  "value": "30"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Forum",
+      "item": [
+        {
+          "name": "List Forum Threads",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/forum",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "forum"]
+            }
+          }
+        },
+        {
+          "name": "Create Forum Thread",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Best rice farming practices\",\n  \"content\": \"What are the best practices for rice farming in Sri Lanka?\",\n  \"category\": \"farming_tips\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/forum",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "forum"]
+            }
+          }
+        },
+        {
+          "name": "Get Forum Thread",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/forum/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "forum", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "THREAD_ID_HERE"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Reply to Forum Thread",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Great question! Here are some tips...\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/forum/:id/replies",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "forum", ":id", "replies"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "THREAD_ID_HERE"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Notifications",
+      "item": [
+        {
+          "name": "List Notifications",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/notifications",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "notifications"]
+            }
+          }
+        },
+        {
+          "name": "Mark Notification as Read",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/notifications/:id/read",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "notifications", ":id", "read"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "NOTIFICATION_ID_HERE"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Purchases",
+      "item": [
+        {
+          "name": "List Purchases",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/purchases",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "purchases"]
+            }
+          }
+        },
+        {
+          "name": "Create Purchase",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dateOfPurchase\": \"2025-01-15\",\n  \"deliveryTime\": \"10 AM\",\n  \"deliveryDistrict\": \"Colombo\",\n  \"productName\": \"Rice Seeds\",\n  \"quantity\": 2,\n  \"message\": \"Leave at gate\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/purchases",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "purchases"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "E-commerce",
+      "item": [
+        {
+          "name": "List Products",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/products",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "products"]
+            }
+          }
+        },
+        {
+          "name": "Get Cart",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/cart",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "cart"]
+            }
+          }
+        },
+        {
+          "name": "List Orders",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/orders",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "orders"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Contact & Support",
+      "item": [
+        {
+          "name": "Send Contact Message",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"subject\": \"Support Request\",\n  \"message\": \"I need help with my crops\",\n  \"phone\": \"+1234567890\",\n  \"category\": \"support\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/contact",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "contact"]
+            }
+          }
+        },
+        {
+          "name": "Get All Contact Messages (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/contact?page=1&limit=10&status=new&search=john",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "contact"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "status",
+                  "value": "new"
+                },
+                {
+                  "key": "search",
+                  "value": "john"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Contact Message by ID (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/contact/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "contact", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "CONTACT_ID_HERE"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Contact Status (Admin)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"in_progress\",\n  \"priority\": \"high\",\n  \"assignedTo\": \"USER_ID_HERE\",\n  \"tags\": [\"urgent\", \"crop-issue\"]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/contact/:id/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "contact", ":id", "status"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "CONTACT_ID_HERE"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Respond to Contact (Admin)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"response\": {\n    \"message\": \"Thank you for contacting us. We have received your message and will get back to you within 24 hours.\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/contact/:id/respond",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "contact", ":id", "respond"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "CONTACT_ID_HERE"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Contact Statistics (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/contact/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "contact", "stats"]
+            }
+          }
+        },
+        {
+          "name": "Delete Contact Message (Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/contact/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "contact", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "CONTACT_ID_HERE"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Subscribe to Newsletter",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john@example.com\",\n  \"name\": \"John Doe\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/subscribe",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "subscribe"]
+            }
+          }
+        },
+        {
+          "name": "Unsubscribe from Newsletter",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/subscribe/unsubscribe",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "subscribe", "unsubscribe"]
+            }
+          }
+        },
+        {
+          "name": "Get Subscriber by Email",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/subscribe/john@example.com",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "subscribe", "john@example.com"]
+            }
+          }
+        },
+        {
+          "name": "Get All Subscribers (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/subscribe?page=1&limit=10&active=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "subscribe"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "active",
+                  "value": "true"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Subscriber Preferences",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"preferences\": {\n    \"newsletter\": true,\n    \"marketing\": false,\n    \"updates\": true\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/subscribe/john@example.com/preferences",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "subscribe", "john@example.com", "preferences"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Demo & Trial",
+      "item": [
+        {
+          "name": "Demo Endpoint",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/demo",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "demo"]
+            }
+          }
+        },
+        {
+          "name": "Register for Trial",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"email\": \"john@example.com\",\n  \"phone\": \"+1234567890\",\n  \"company\": \"Doe Farms\",\n  \"position\": \"Farm Manager\",\n  \"farmName\": \"Green Valley Farm\",\n  \"farmSize\": 50,\n  \"sizeUnit\": \"acres\",\n  \"address\": \"123 Farm Road\",\n  \"city\": \"Colombo\",\n  \"state\": \"Western Province\",\n  \"country\": \"Sri Lanka\",\n  \"latitude\": 6.9271,\n  \"longitude\": 79.8612,\n  \"crops\": [\"Rice\", \"Vegetables\", \"Fruits\"],\n  \"farmingExperience\": 5,\n  \"currentChallenges\": [\"Weather monitoring\", \"Market prices\", \"Crop diseases\"],\n  \"goals\": [\"Increase yield\", \"Reduce costs\", \"Better planning\"],\n  \"trialType\": \"premium\",\n  \"duration\": 14,\n  \"referralCode\": \"FRIEND2024\",\n  \"source\": \"api\",\n  \"notes\": \"Interested in premium features\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/trial",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "trial"]
+            }
+          }
+        },
+        {
+          "name": "Get Trial Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/trial/status/john@example.com",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "trial", "status", "john@example.com"]
+            }
+          }
+        },
+        {
+          "name": "Get Trial Usage",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/trial/usage/john@example.com",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "trial", "usage", "john@example.com"]
+            }
+          }
+        },
+        {
+          "name": "Update Trial Usage",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"apiCalls\": 150,\n  \"loginCount\": 5\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/trial/usage/john@example.com",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "trial", "usage", "john@example.com"]
+            }
+          }
+        },
+        {
+          "name": "Convert Trial to Paid",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"subscriptionType\": \"premium\",\n  \"paymentDetails\": \"Credit Card ending in 1234\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/trial/convert/john@example.com",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "trial", "convert", "john@example.com"]
+            }
+          }
+        },
+        {
+          "name": "Cancel Trial",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Found alternative solution\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/trial/cancel/john@example.com",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "trial", "cancel", "john@example.com"]
+            }
+          }
+        },
+        {
+          "name": "Get All Trials (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/trial?page=1&limit=10&status=active&trialType=premium&search=john",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "trial"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "status",
+                  "value": "active"
+                },
+                {
+                  "key": "trialType",
+                  "value": "premium"
+                },
+                {
+                  "key": "search",
+                  "value": "john"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Trial Statistics (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/trial/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "trial", "stats"]
+            }
+          }
+        },
+        {
+          "name": "Register for Trial",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "register"]
+            }
+          }
+        },
+        {
+          "name": "Request Consultation",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/consultations",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "consultations"]
+            }
+          }
+        },
+        {
+          "name": "Community Features",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/community",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "community"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "OIDC",
+      "item": [
+        {
+          "name": "Get OIDC Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/oidc/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "oidc", "profile"]
+            }
+          }
+        },
+        {
+          "name": "Get OIDC Options",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/oidc/options",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "oidc", "options"]
+            }
+          }
+        },
+        {
+          "name": "Create OIDC Purchase",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dateOfPurchase\": \"2025-12-01\",\n  \"deliveryTime\": \"10 AM\",\n  \"deliveryDistrict\": \"Colombo\",\n  \"productName\": \"Rice\",\n  \"quantity\": 2,\n  \"message\": \"Leave at gate\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/oidc/purchases",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "oidc", "purchases"]
+            }
+          }
+        },
+        {
+          "name": "List OIDC Purchases",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/oidc/purchases",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "oidc", "purchases"]
+            }
+          }
+        },
+        {
+          "name": "Get Logout URL",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/oidc/logout-url",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "oidc", "logout-url"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

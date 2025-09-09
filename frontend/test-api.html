@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Test</title>
+</head>
+<body>
+    <h1>API Connection Test</h1>
+    <div id="results"></div>
+    
+    <script>
+        async function testAPI() {
+            const results = document.getElementById('results');
+            
+            try {
+                // Test 1: Backend health check
+                results.innerHTML += '<h3>1. Testing Backend Health...</h3>';
+                const healthResponse = await fetch('http://localhost:5000/health');
+                const healthData = await healthResponse.json();
+                results.innerHTML += `<p>✅ Backend Health: ${JSON.stringify(healthData)}</p>`;
+                
+                // Test 2: Login endpoint
+                results.innerHTML += '<h3>2. Testing Login Endpoint...</h3>';
+                const loginResponse = await fetch('http://localhost:5000/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: 'admin@farmerassistant.com',
+                        password: 'admin123'
+                    })
+                });
+                
+                if (loginResponse.ok) {
+                    const loginData = await loginResponse.json();
+                    results.innerHTML += `<p>✅ Login Success: ${JSON.stringify(loginData)}</p>`;
+                } else {
+                    const errorData = await loginResponse.text();
+                    results.innerHTML += `<p>❌ Login Error: ${errorData}</p>`;
+                }
+                
+            } catch (error) {
+                results.innerHTML += `<p>❌ Network Error: ${error.message}</p>`;
+                results.innerHTML += `<p>This might be a CORS issue or network connectivity problem.</p>`;
+            }
+        }
+        
+        // Run test when page loads
+        testAPI();
+    </script>
+</body>
+</html>
+

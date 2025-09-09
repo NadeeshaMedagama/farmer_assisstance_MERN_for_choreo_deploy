@@ -1,0 +1,62 @@
+{
+  "info": {
+    "name": "Farmer Assistance OIDC",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Profile",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "url": { "raw": "{{baseUrl}}/api/oidc/profile", "host": ["{{baseUrl}}"], "path": ["api", "oidc", "profile"] }
+      }
+    },
+    {
+      "name": "Options",
+      "request": {
+        "method": "GET",
+        "url": { "raw": "{{baseUrl}}/api/oidc/options", "host": ["{{baseUrl}}"], "path": ["api", "oidc", "options"] }
+      }
+    },
+    {
+      "name": "Create Purchase",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"dateOfPurchase\": \"2025-12-01\",\n  \"deliveryTime\": \"10 AM\",\n  \"deliveryDistrict\": \"Colombo\",\n  \"productName\": \"Rice\",\n  \"quantity\": 2,\n  \"message\": \"Leave at gate\"\n}"
+        },
+        "url": { "raw": "{{baseUrl}}/api/oidc/purchases", "host": ["{{baseUrl}}"], "path": ["api", "oidc", "purchases"] }
+      }
+    },
+    {
+      "name": "List Purchases",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "url": { "raw": "{{baseUrl}}/api/oidc/purchases", "host": ["{{baseUrl}}"], "path": ["api", "oidc", "purchases"] }
+      }
+    },
+    {
+      "name": "Logout URL",
+      "request": {
+        "method": "GET",
+        "url": { "raw": "{{baseUrl}}/api/oidc/logout-url", "host": ["{{baseUrl}}"], "path": ["api", "oidc", "logout-url"] }
+      }
+    }
+  ],
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5000" },
+    { "key": "token", "value": "" }
+  ]
+}
+

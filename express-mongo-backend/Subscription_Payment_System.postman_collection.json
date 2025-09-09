@@ -1,0 +1,779 @@
+{
+  "info": {
+    "name": "Farmer Assistance - Subscription & Payment System",
+    "description": "Complete API collection for testing the subscription and payment system",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.0"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000",
+      "type": "string"
+    },
+    {
+      "key": "authToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "subscriptionId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "planId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "paymentMethodId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "paymentId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"password123\",\n  \"phone\": \"+1234567890\",\n  \"company\": \"Farm Corp\",\n  \"position\": \"Farm Manager\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Login User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.data && response.data.token) {",
+                  "        pm.collectionVariables.set('authToken', response.data.token);",
+                  "        pm.collectionVariables.set('userId', response.data.user.id);",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Subscription Plans",
+      "item": [
+        {
+          "name": "Get All Plans",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/subscription-plans",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "subscription-plans"]
+            }
+          }
+        },
+        {
+          "name": "Get Plans by Type",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/subscription-plans?type=premium",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "subscription-plans"],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "premium"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Single Plan",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/subscription-plans/{{planId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "subscription-plans", "{{planId}}"]
+            }
+          }
+        },
+        {
+          "name": "Get Plan Features",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/subscription-plans/{{planId}}/features",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "subscription-plans", "{{planId}}", "features"]
+            }
+          }
+        },
+        {
+          "name": "Create Plan (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Professional Plan\",\n  \"description\": \"Advanced features for professional farmers\",\n  \"type\": \"premium\",\n  \"price\": {\n    \"amount\": 49.99,\n    \"currency\": \"USD\",\n    \"billingCycle\": \"monthly\"\n  },\n  \"features\": [\n    {\n      \"name\": \"crop_management\",\n      \"description\": \"Advanced crop management tools\",\n      \"included\": true,\n      \"limits\": {\n        \"maxCrops\": 50\n      }\n    },\n    {\n      \"name\": \"weather_monitoring\",\n      \"description\": \"Real-time weather data\",\n      \"included\": true\n    },\n    {\n      \"name\": \"expert_consultation\",\n      \"description\": \"Access to expert consultations\",\n      \"included\": true,\n      \"limits\": {\n        \"maxConsultations\": 10\n      }\n    }\n  ],\n  \"limits\": {\n    \"maxApiCalls\": 5000,\n    \"maxUsers\": 5,\n    \"maxFarms\": 3,\n    \"storageLimit\": 500\n  },\n  \"trialDays\": 14,\n  \"isPopular\": true,\n  \"sortOrder\": 2\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/subscription-plans",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "subscription-plans"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.data && response.data._id) {",
+                  "        pm.collectionVariables.set('planId', response.data._id);",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Plan (Admin)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Professional Plan Updated\",\n  \"description\": \"Updated advanced features for professional farmers\",\n  \"price\": {\n    \"amount\": 59.99,\n    \"currency\": \"USD\",\n    \"billingCycle\": \"monthly\"\n  },\n  \"isPopular\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/subscription-plans/{{planId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "subscription-plans", "{{planId}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Plan (Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/subscription-plans/{{planId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "subscription-plans", "{{planId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Subscriptions",
+      "item": [
+        {
+          "name": "Get My Subscriptions",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/subscriptions/my-subscriptions",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "subscriptions", "my-subscriptions"]
+            }
+          }
+        },
+        {
+          "name": "Get Single Subscription",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/subscriptions/{{subscriptionId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "subscriptions", "{{subscriptionId}}"]
+            }
+          }
+        },
+        {
+          "name": "Create Subscription",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"planId\": \"{{planId}}\",\n  \"paymentMethodId\": \"{{paymentMethodId}}\",\n  \"startTrial\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/subscriptions",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "subscriptions"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.data && response.data._id) {",
+                  "        pm.collectionVariables.set('subscriptionId', response.data._id);",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Subscription",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"active\",\n  \"metadata\": {\n    \"notes\": \"Updated subscription details\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/subscriptions/{{subscriptionId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "subscriptions", "{{subscriptionId}}"]
+            }
+          }
+        },
+        {
+          "name": "Cancel Subscription",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Found a better solution\",\n  \"effectiveDate\": \"2024-12-31T23:59:59.000Z\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/subscriptions/{{subscriptionId}}/cancel",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "subscriptions", "{{subscriptionId}}", "cancel"]
+            }
+          }
+        },
+        {
+          "name": "Get Subscription Usage",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/subscriptions/{{subscriptionId}}/usage",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "subscriptions", "{{subscriptionId}}", "usage"]
+            }
+          }
+        },
+        {
+          "name": "Update Subscription Usage",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"apiCalls\": 150,\n  \"loginCount\": 5\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/subscriptions/{{subscriptionId}}/usage",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "subscriptions", "{{subscriptionId}}", "usage"]
+            }
+          }
+        },
+        {
+          "name": "Get All Subscriptions (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/subscriptions/admin/all?status=active&limit=10&page=1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "subscriptions", "admin", "all"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "active"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Payment Methods",
+      "item": [
+        {
+          "name": "Get My Payment Methods",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/payments/methods/my-methods",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments", "methods", "my-methods"]
+            }
+          }
+        },
+        {
+          "name": "Add Payment Method",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"credit_card\",\n  \"provider\": \"stripe\",\n  \"details\": {\n    \"last4\": \"4242\",\n    \"brand\": \"visa\",\n    \"expMonth\": 12,\n    \"expYear\": 2025\n  },\n  \"isDefault\": true,\n  \"metadata\": {\n    \"stripePaymentMethodId\": \"pm_1234567890\",\n    \"stripeCustomerId\": \"cus_1234567890\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/payments/methods",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments", "methods"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.data && response.data._id) {",
+                  "        pm.collectionVariables.set('paymentMethodId', response.data._id);",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Payment Method",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"isDefault\": false,\n  \"details\": {\n    \"last4\": \"4242\",\n    \"brand\": \"visa\",\n    \"expMonth\": 12,\n    \"expYear\": 2026\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/payments/methods/{{paymentMethodId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments", "methods", "{{paymentMethodId}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Payment Method",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/payments/methods/{{paymentMethodId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments", "methods", "{{paymentMethodId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Payments",
+      "item": [
+        {
+          "name": "Get My Payments",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/payments/my-payments?limit=10&page=1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments", "my-payments"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Single Payment",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/payments/{{paymentId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments", "{{paymentId}}"]
+            }
+          }
+        },
+        {
+          "name": "Create Payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"subscriptionId\": \"{{subscriptionId}}\",\n  \"paymentMethodId\": \"{{paymentMethodId}}\",\n  \"amount\": 49.99,\n  \"description\": \"Monthly subscription payment\",\n  \"type\": \"subscription\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/payments",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.data && response.data._id) {",
+                  "        pm.collectionVariables.set('paymentId', response.data._id);",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Payment Status",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"completed\",\n  \"providerData\": {\n    \"transactionId\": \"txn_1234567890\",\n    \"chargeId\": \"ch_1234567890\",\n    \"paymentIntentId\": \"pi_1234567890\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/payments/{{paymentId}}/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments", "{{paymentId}}", "status"]
+            }
+          }
+        },
+        {
+          "name": "Process Refund",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 49.99,\n  \"reason\": \"Customer requested refund\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/payments/{{paymentId}}/refund",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments", "{{paymentId}}", "refund"]
+            }
+          }
+        },
+        {
+          "name": "Get All Payments (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/payments/admin/all?status=completed&limit=10&page=1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments", "admin", "all"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "completed"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Trial Conversion",
+      "item": [
+        {
+          "name": "Convert Trial to Paid Subscription",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"planId\": \"{{planId}}\",\n  \"paymentMethodId\": \"{{paymentMethodId}}\",\n  \"paymentDetails\": \"Credit Card ending in 4242\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/trial/convert/john.doe@example.com",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "trial", "convert", "john.doe@example.com"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Sample Data Setup",
+      "item": [
+        {
+          "name": "Create Sample Subscription Plans",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "[\n  {\n    \"name\": \"Basic Plan\",\n    \"description\": \"Essential features for small farms\",\n    \"type\": \"basic\",\n    \"price\": {\n      \"amount\": 19.99,\n      \"currency\": \"USD\",\n      \"billingCycle\": \"monthly\"\n    },\n    \"features\": [\n      {\n        \"name\": \"crop_management\",\n        \"description\": \"Basic crop management tools\",\n        \"included\": true\n      },\n      {\n        \"name\": \"weather_monitoring\",\n        \"description\": \"Basic weather data\",\n        \"included\": true\n      },\n      {\n        \"name\": \"market_prices\",\n        \"description\": \"Market price information\",\n        \"included\": true\n      },\n      {\n        \"name\": \"forum_access\",\n        \"description\": \"Community forum access\",\n        \"included\": true\n      }\n    ],\n    \"limits\": {\n      \"maxApiCalls\": 1000,\n      \"maxUsers\": 1,\n      \"maxFarms\": 1,\n      \"storageLimit\": 100\n    },\n    \"trialDays\": 14,\n    \"isPopular\": false,\n    \"sortOrder\": 1\n  },\n  {\n    \"name\": \"Premium Plan\",\n    \"description\": \"Advanced features for growing farms\",\n    \"type\": \"premium\",\n    \"price\": {\n      \"amount\": 49.99,\n      \"currency\": \"USD\",\n      \"billingCycle\": \"monthly\"\n    },\n    \"features\": [\n      {\n        \"name\": \"crop_management\",\n        \"description\": \"Advanced crop management tools\",\n        \"included\": true,\n        \"limits\": {\n          \"maxCrops\": 25\n        }\n      },\n      {\n        \"name\": \"weather_monitoring\",\n        \"description\": \"Real-time weather data\",\n        \"included\": true\n      },\n      {\n        \"name\": \"market_prices\",\n        \"description\": \"Advanced market analytics\",\n        \"included\": true\n      },\n      {\n        \"name\": \"forum_access\",\n        \"description\": \"Community forum access\",\n        \"included\": true\n      },\n      {\n        \"name\": \"expert_consultation\",\n        \"description\": \"Access to expert consultations\",\n        \"included\": true,\n        \"limits\": {\n          \"maxConsultations\": 5\n        }\n      },\n      {\n        \"name\": \"mobile_app\",\n        \"description\": \"Mobile app access\",\n        \"included\": true\n      }\n    ],\n    \"limits\": {\n      \"maxApiCalls\": 5000,\n      \"maxUsers\": 3,\n      \"maxFarms\": 2,\n      \"storageLimit\": 500\n    },\n    \"trialDays\": 14,\n    \"isPopular\": true,\n    \"sortOrder\": 2\n  },\n  {\n    \"name\": \"Enterprise Plan\",\n    \"description\": \"Complete solution for large farming operations\",\n    \"type\": \"enterprise\",\n    \"price\": {\n      \"amount\": 99.99,\n      \"currency\": \"USD\",\n      \"billingCycle\": \"monthly\"\n    },\n    \"features\": [\n      {\n        \"name\": \"crop_management\",\n        \"description\": \"Enterprise crop management tools\",\n        \"included\": true,\n        \"limits\": {\n          \"maxCrops\": 100\n        }\n      },\n      {\n        \"name\": \"weather_monitoring\",\n        \"description\": \"Advanced weather analytics\",\n        \"included\": true\n      },\n      {\n        \"name\": \"market_prices\",\n        \"description\": \"Real-time market intelligence\",\n        \"included\": true\n      },\n      {\n        \"name\": \"forum_access\",\n        \"description\": \"Community forum access\",\n        \"included\": true\n      },\n      {\n        \"name\": \"expert_consultation\",\n        \"description\": \"Unlimited expert consultations\",\n        \"included\": true\n      },\n      {\n        \"name\": \"mobile_app\",\n        \"description\": \"Mobile app access\",\n        \"included\": true\n      },\n      {\n        \"name\": \"api_access\",\n        \"description\": \"API access for integrations\",\n        \"included\": true\n      },\n      {\n        \"name\": \"custom_reports\",\n        \"description\": \"Custom reporting tools\",\n        \"included\": true\n      },\n      {\n        \"name\": \"priority_support\",\n        \"description\": \"24/7 priority support\",\n        \"included\": true\n      }\n    ],\n    \"limits\": {\n      \"maxApiCalls\": 50000,\n      \"maxUsers\": 10,\n      \"maxFarms\": 5,\n      \"storageLimit\": 2000\n    },\n    \"trialDays\": 30,\n    \"isPopular\": false,\n    \"sortOrder\": 3\n  }\n]"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/subscription-plans/bulk-create",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "subscription-plans", "bulk-create"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -5,7 +5,27 @@ const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 const session = require('express-session');
 const path = require('path');
-require('dotenv').config();
+
+console.log('🚀 Starting Farmer Assistance Backend Service...');
+console.log('📋 Environment:', process.env.NODE_ENV || 'development');
+
+// Load environment variables with Choreo-specific configuration
+let envFile;
+if (process.env.NODE_ENV === 'production') {
+  envFile = './config.production.env';
+} else if (process.env.NODE_ENV === 'test') {
+  envFile = './config.test.env';
+} else {
+  envFile = './config.env';
+}
+console.log('📁 Loading environment from:', envFile);
+require('dotenv').config({ path: envFile });
+
+console.log('🔧 Environment variables loaded:');
+console.log('  - PORT:', process.env.PORT);
+console.log('  - NODE_ENV:', process.env.NODE_ENV);
+console.log('  - MONGODB_URI:', process.env.MONGODB_URI ? 'Set' : 'Not set');
+console.log('  - CORS_ORIGIN:', process.env.CORS_ORIGIN ? 'Set' : 'Not set');
 
 // Import database connection
 const connectDB = require('./config/database');
@@ -50,7 +70,6 @@ const {
   xssProtection,
   hppProtection,
   mongoSanitization,
-  corsOptions,
   validateInput,
   sqlInjectionProtection,
   validateContentType,
@@ -67,9 +86,10 @@ const HTTPS_ENABLE = (httpsFlag || 'false').toLowerCase() === 'true';
 const SSL_KEY_PATH = process.env.SSL_KEY_PATH;
 const SSL_CERT_PATH = process.env.SSL_CERT_PATH;
 
-// Connect to MongoDB (optional during local boot)
+// Connect to database
+console.log('🔌 Connecting to database...');
 if (process.env.SKIP_DB === 'true') {
-  logger.warn('Skipping MongoDB connection (SKIP_DB=true)');
+  console.log('⚠️ Skipping MongoDB connection (SKIP_DB=true)');
 } else {
   connectDB();
 }
@@ -95,7 +115,18 @@ app.use('/api/', limiter);
 // Optional extra general limiter
 app.use(generalLimiter);
 
-// CORS configuration
+// CORS configuration with Choreo-specific origins
+const corsOptions = {
+  origin: process.env.NODE_ENV === 'production'
+    ? [
+        'https://farmer-assistance-frontend.choreo.dev',
+        'https://farmer-assistance-api.choreo.dev',
+        process.env.CORS_ORIGIN
+      ].filter(Boolean)
+    : process.env.CORS_ORIGIN || '*',
+  credentials: true,
+  optionsSuccessStatus: 200
+};
 app.use(cors(corsOptions));
 
 // Body parsing middleware
@@ -126,12 +157,15 @@ app.get('/health', (req, res) => {
     version: '1.0.0'
   });
 });
+
 app.get('/api/health', (req, res) => {
-  res.json({
-    status: 'OK',
+  res.status(200).json({
+    success: true,
+    message: 'Server is running',
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || 'development',
-    googleClientId: process.env.GOOGLE_CLIENT_ID ? 'Configured' : 'Not Configured'
+    googleClientId: process.env.GOOGLE_CLIENT_ID ? 'Configured' : 'Not Configured',
+    mongodb: process.env.MONGODB_URI ? 'Connected' : 'Not Connected'
   });
 });
 
@@ -205,12 +239,20 @@ if ((process.env.NODE_ENV || 'development') === 'production') {
   );
 }
 
-// 404 handler (Express 5 compatible)
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({
+    success: false,
+    error: 'Something went wrong!'
+  });
+});
+
+// 404 handler
 app.use((req, res) => {
   res.status(404).json({
     success: false,
-    message: 'Route not found',
-    path: req.originalUrl
+    error: 'Route not found'
   });
 });
 
@@ -219,49 +261,57 @@ app.use(errorHandler);
 
 // Start server (HTTP or HTTPS) with captured server instance
 let server;
-if (HTTPS_ENABLE && SSL_KEY_PATH && SSL_CERT_PATH && fs.existsSync(SSL_KEY_PATH) && fs.existsSync(SSL_CERT_PATH)) {
-  const key = fs.readFileSync(SSL_KEY_PATH);
-  const cert = fs.readFileSync(SSL_CERT_PATH);
-  server = https.createServer({ key, cert }, app).listen(PORT, () => {
-    logger.info(`🔐 HTTPS server running on port ${PORT}`);
-    logger.info(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
-    logger.info(`🌐 Health check: https://localhost:${PORT}/health`);
-  });
-} else {
-  if (HTTPS_ENABLE) {
-    logger.warn('HTTPS requested but SSL_KEY_PATH/SSL_CERT_PATH not found. Falling back to HTTP.');
-  }
-  server = app.listen(PORT, () => {
-    logger.info(`🚀 HTTP server running on port ${PORT}`);
-    logger.info(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
-    logger.info(`🌐 Health check: http://localhost:${PORT}/health`);
-  });
-}
 
-// Server error handling
-server.on('error', (error) => {
-  if (error && error.code === 'EADDRINUSE') {
-    logger.error(`Port ${PORT} is already in use. Please free the port and retry.`);
-    process.exit(1);
-  }
-  logger.error('Server error', error);
-  process.exit(1);
-});
-
-// Graceful shutdown
-const shutdown = (signal) => {
-  logger.info(`${signal} received, shutting down gracefully`);
-  if (server && server.close) {
-    server.close(() => {
-      logger.info('Server closed');
-      process.exit(0);
+// Only start server if not in test environment
+if (process.env.NODE_ENV !== 'test') {
+  if (HTTPS_ENABLE && SSL_KEY_PATH && SSL_CERT_PATH && fs.existsSync(SSL_KEY_PATH) && fs.existsSync(SSL_CERT_PATH)) {
+    const key = fs.readFileSync(SSL_KEY_PATH);
+    const cert = fs.readFileSync(SSL_CERT_PATH);
+    server = https.createServer({ key, cert }, app).listen(PORT, () => {
+      console.log('✅ Server successfully started!');
+      console.log(`🔐 HTTPS server running on port ${PORT}`);
+      console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
+      console.log(`🌐 Health check: https://localhost:${PORT}/api/health`);
+      console.log(`📡 API endpoints available at: https://localhost:${PORT}/api/`);
     });
   } else {
-    process.exit(0);
+    if (HTTPS_ENABLE) {
+      console.log('⚠️ HTTPS requested but SSL_KEY_PATH/SSL_CERT_PATH not found. Falling back to HTTP.');
+    }
+    server = app.listen(PORT, () => {
+      console.log('✅ Server successfully started!');
+      console.log(`🚀 HTTP server running on port ${PORT}`);
+      console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
+      console.log(`🌐 Health check: http://localhost:${PORT}/api/health`);
+      console.log(`📡 API endpoints available at: http://localhost:${PORT}/api/`);
+    });
   }
-};
 
-process.on('SIGTERM', () => shutdown('SIGTERM'));
-process.on('SIGINT', () => shutdown('SIGINT'));
+  // Server error handling
+  server.on('error', (error) => {
+    if (error && error.code === 'EADDRINUSE') {
+      console.error(`❌ Port ${PORT} is already in use. Please free the port and retry.`);
+      process.exit(1);
+    }
+    console.error('❌ Server error:', error);
+    process.exit(1);
+  });
+
+  // Graceful shutdown
+  const shutdown = (signal) => {
+    console.log(`🛑 ${signal} received, shutting down gracefully`);
+    if (server && server.close) {
+      server.close(() => {
+        console.log('✅ Server closed');
+        process.exit(0);
+      });
+    } else {
+      process.exit(0);
+    }
+  };
+
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
+  process.on('SIGINT', () => shutdown('SIGINT'));
+}
 
 module.exports = app;

@@ -1,0 +1,1427 @@
+openapi: 3.0.3
+info:
+  title: Farmer Assistance API
+  version: 1.0.0
+  description: RESTful API for managing farmer assistance services including crop management, market data, weather information, and community features
+servers:
+  - url: https://farmer-assistance-api.choreo.dev
+    description: Production server
+  - url: http://localhost:8080
+    description: Local development server
+paths:
+  /health:
+    get:
+      summary: Health check
+      tags: [Health]
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "OK"
+                  message:
+                    type: string
+                    example: "Farmer Assistance API is running"
+                  timestamp:
+                    type: string
+                    format: date-time
+                  version:
+                    type: string
+                    example: "1.0.0"
+  /api/health:
+    get:
+      summary: API health check
+      tags: [Health]
+      responses:
+        '200':
+          description: API is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "OK"
+                  timestamp:
+                    type: string
+                    format: date-time
+                  environment:
+                    type: string
+                    example: "development"
+                  googleClientId:
+                    type: string
+                    example: "Configured"
+
+  # Authentication endpoints
+  /api/auth/register:
+    post:
+      summary: Register a new user
+      tags: [Authentication]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/User'
+                  token:
+                    type: string
+        '400':
+          description: Validation error
+        '409':
+          description: User already exists
+  /api/auth/login:
+    post:
+      summary: Login user
+      tags: [Authentication]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/User'
+                  token:
+                    type: string
+        '401':
+          description: Invalid credentials
+  /api/auth/me:
+    get:
+      summary: Get current user profile
+      tags: [Authentication]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: User profile retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized
+    put:
+      summary: Update user profile
+      tags: [Authentication]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+      responses:
+        '200':
+          description: Profile updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized
+  /api/auth/forgot-password:
+    post:
+      summary: Request password reset
+      tags: [Authentication]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+              required: [email]
+      responses:
+        '200':
+          description: Password reset email sent
+        '404':
+          description: User not found
+  /api/auth/reset-password:
+    post:
+      summary: Reset password
+      tags: [Authentication]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+                password:
+                  type: string
+                  minLength: 6
+              required: [token, password]
+      responses:
+        '200':
+          description: Password reset successfully
+        '400':
+          description: Invalid or expired token
+
+  # Crop management endpoints
+  /api/crops:
+    get:
+      summary: Get all crops for current user
+      tags: [Crops]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of crops
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Crop'
+        '401':
+          description: Unauthorized
+    post:
+      summary: Create a new crop
+      tags: [Crops]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCropRequest'
+      responses:
+        '201':
+          description: Crop created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/Crop'
+        '401':
+          description: Unauthorized
+        '400':
+          description: Validation error
+  /api/crops/{id}:
+    get:
+      summary: Get a specific crop
+      tags: [Crops]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Crop details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/Crop'
+        '401':
+          description: Unauthorized
+        '404':
+          description: Crop not found
+    put:
+      summary: Update a crop
+      tags: [Crops]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCropRequest'
+      responses:
+        '200':
+          description: Crop updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/Crop'
+        '401':
+          description: Unauthorized
+        '404':
+          description: Crop not found
+    delete:
+      summary: Delete a crop
+      tags: [Crops]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Crop deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+        '401':
+          description: Unauthorized
+        '404':
+          description: Crop not found
+
+  # Market data endpoints
+  /api/market:
+    get:
+      summary: Get market data
+      tags: [Market]
+      parameters:
+        - name: crop
+          in: query
+          schema:
+            type: string
+          description: Filter by crop name
+        - name: city
+          in: query
+          schema:
+            type: string
+          description: Filter by city
+        - name: state
+          in: query
+          schema:
+            type: string
+          description: Filter by state
+      responses:
+        '200':
+          description: Market data retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Market'
+    post:
+      summary: Add or update market data
+      tags: [Market]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMarketRequest'
+      responses:
+        '201':
+          description: Market data created/updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/Market'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Insufficient permissions
+  /api/market/external:
+    get:
+      summary: Get external market lookup
+      tags: [Market]
+      responses:
+        '200':
+          description: External market data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Market'
+
+  # Weather endpoints
+  /api/weather:
+    get:
+      summary: Get weather data
+      tags: [Weather]
+      parameters:
+        - name: lat
+          in: query
+          required: true
+          schema:
+            type: number
+          description: Latitude
+        - name: lon
+          in: query
+          required: true
+          schema:
+            type: number
+          description: Longitude
+        - name: days
+          in: query
+          schema:
+            type: integer
+            default: 7
+          description: Number of days to forecast
+      responses:
+        '200':
+          description: Weather data retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/WeatherData'
+        '400':
+          description: Invalid coordinates
+
+  # Forum endpoints
+  /api/forum:
+    get:
+      summary: Get forum threads
+      tags: [Forum]
+      responses:
+        '200':
+          description: Forum threads retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ForumThread'
+    post:
+      summary: Create a new forum thread
+      tags: [Forum]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateForumThreadRequest'
+      responses:
+        '201':
+          description: Forum thread created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/ForumThread'
+        '401':
+          description: Unauthorized
+  /api/forum/{id}:
+    get:
+      summary: Get a specific forum thread
+      tags: [Forum]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Forum thread details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/ForumThread'
+        '404':
+          description: Thread not found
+
+  # Admin endpoints
+  /api/admin/dashboard:
+    get:
+      summary: Get admin dashboard data
+      tags: [Admin]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Admin dashboard data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/AdminDashboard'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Admin access required
+  /api/admin/users:
+    get:
+      summary: Get all users
+      tags: [Admin]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of users
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Admin access required
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    User:
+      type: object
+      properties:
+        _id:
+          type: string
+          description: Unique identifier for the user
+        firstName:
+          type: string
+          maxLength: 50
+        lastName:
+          type: string
+          maxLength: 50
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        role:
+          type: string
+          enum: [farmer, expert, admin]
+          default: farmer
+        location:
+          $ref: '#/components/schemas/Location'
+        farmSize:
+          type: number
+          minimum: 0
+          description: Farm size in acres
+        farmingExperience:
+          type: number
+          minimum: 0
+          description: Years of farming experience
+        avatar:
+          type: string
+          default: default-avatar.jpg
+        isVerified:
+          type: boolean
+          default: false
+        preferences:
+          $ref: '#/components/schemas/UserPreferences'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required: [firstName, lastName, email, phone, role]
+
+    Location:
+      type: object
+      properties:
+        address:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        country:
+          type: string
+        coordinates:
+          type: object
+          properties:
+            latitude:
+              type: number
+              minimum: -90
+              maximum: 90
+            longitude:
+              type: number
+              minimum: -180
+              maximum: 180
+      required: [address, city, state, country]
+
+    UserPreferences:
+      type: object
+      properties:
+        notifications:
+          type: object
+          properties:
+            email:
+              type: boolean
+              default: true
+            sms:
+              type: boolean
+              default: false
+            push:
+              type: boolean
+              default: true
+        language:
+          type: string
+          default: en
+        units:
+          type: object
+          properties:
+            temperature:
+              type: string
+              default: celsius
+            distance:
+              type: string
+              default: metric
+
+    RegisterRequest:
+      type: object
+      properties:
+        firstName:
+          type: string
+          minLength: 1
+        lastName:
+          type: string
+          minLength: 1
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 6
+        phone:
+          type: string
+          minLength: 6
+        location:
+          $ref: '#/components/schemas/Location'
+        farmSize:
+          type: number
+          minimum: 0
+        farmingExperience:
+          type: number
+          minimum: 0
+      required: [firstName, lastName, email, password, phone, location]
+
+    LoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 6
+      required: [email, password]
+
+    UpdateUserRequest:
+      type: object
+      properties:
+        firstName:
+          type: string
+          minLength: 1
+        lastName:
+          type: string
+          minLength: 1
+        phone:
+          type: string
+          minLength: 6
+        location:
+          $ref: '#/components/schemas/Location'
+        farmSize:
+          type: number
+          minimum: 0
+        farmingExperience:
+          type: number
+          minimum: 0
+        preferences:
+          $ref: '#/components/schemas/UserPreferences'
+
+    Crop:
+      type: object
+      properties:
+        _id:
+          type: string
+          description: Unique identifier for the crop
+        name:
+          type: string
+          maxLength: 100
+        variety:
+          type: string
+          maxLength: 100
+        type:
+          type: string
+          enum: [vegetable, fruit, grain, legume, herb, spice, other]
+          default: vegetable
+        plantingDate:
+          type: string
+          format: date
+        expectedHarvestDate:
+          type: string
+          format: date
+        actualHarvestDate:
+          type: string
+          format: date
+        area:
+          type: number
+          minimum: 0
+        unit:
+          type: string
+          enum: [acres, hectares, square_meters]
+          default: acres
+        plantingMethod:
+          type: string
+          enum: [direct_seeding, transplanting, bulb_planting, cutting, other]
+          default: direct_seeding
+        soilType:
+          type: string
+          enum: [clay, sandy, loamy, silty, peaty, chalky, unknown]
+          default: unknown
+        irrigationMethod:
+          type: string
+          enum: [drip, sprinkler, flood, manual, rainfed]
+          default: manual
+        yield:
+          $ref: '#/components/schemas/CropYield'
+        cost:
+          $ref: '#/components/schemas/CropCost'
+        revenue:
+          type: number
+          minimum: 0
+          default: 0
+        profit:
+          type: number
+          default: 0
+        status:
+          type: string
+          enum: [planted, growing, flowering, fruiting, harvested, failed]
+          default: planted
+        notes:
+          type: string
+          maxLength: 1000
+        farmer:
+          type: string
+          description: Reference to User ID
+        location:
+          $ref: '#/components/schemas/Location'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required: [name, type, plantingDate, expectedHarvestDate, area, farmer]
+
+    CropYield:
+      type: object
+      properties:
+        expected:
+          type: number
+          minimum: 0
+        actual:
+          type: number
+          minimum: 0
+        unit:
+          type: string
+          enum: [kg, lbs, tons, bushels, quintals]
+          default: kg
+
+    CropCost:
+      type: object
+      properties:
+        seeds:
+          type: number
+          minimum: 0
+          default: 0
+        fertilizer:
+          type: number
+          minimum: 0
+          default: 0
+        pesticides:
+          type: number
+          minimum: 0
+          default: 0
+        labor:
+          type: number
+          minimum: 0
+          default: 0
+        irrigation:
+          type: number
+          minimum: 0
+          default: 0
+        other:
+          type: number
+          minimum: 0
+          default: 0
+        total:
+          type: number
+          minimum: 0
+          default: 0
+
+    CreateCropRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        variety:
+          type: string
+          maxLength: 100
+        type:
+          type: string
+          enum: [vegetable, fruit, grain, legume, herb, spice, other]
+        plantingDate:
+          type: string
+          format: date
+        expectedHarvestDate:
+          type: string
+          format: date
+        area:
+          type: number
+          minimum: 0
+        unit:
+          type: string
+          enum: [acres, hectares, square_meters]
+        plantingMethod:
+          type: string
+          enum: [direct_seeding, transplanting, bulb_planting, cutting, other]
+        soilType:
+          type: string
+          enum: [clay, sandy, loamy, silty, peaty, chalky, unknown]
+        irrigationMethod:
+          type: string
+          enum: [drip, sprinkler, flood, manual, rainfed]
+        notes:
+          type: string
+          maxLength: 1000
+        location:
+          $ref: '#/components/schemas/Location'
+      required: [name, type, plantingDate, expectedHarvestDate, area]
+
+    UpdateCropRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        variety:
+          type: string
+          maxLength: 100
+        type:
+          type: string
+          enum: [vegetable, fruit, grain, legume, herb, spice, other]
+        plantingDate:
+          type: string
+          format: date
+        expectedHarvestDate:
+          type: string
+          format: date
+        actualHarvestDate:
+          type: string
+          format: date
+        area:
+          type: number
+          minimum: 0
+        unit:
+          type: string
+          enum: [acres, hectares, square_meters]
+        plantingMethod:
+          type: string
+          enum: [direct_seeding, transplanting, bulb_planting, cutting, other]
+        soilType:
+          type: string
+          enum: [clay, sandy, loamy, silty, peaty, chalky, unknown]
+        irrigationMethod:
+          type: string
+          enum: [drip, sprinkler, flood, manual, rainfed]
+        yield:
+          $ref: '#/components/schemas/CropYield'
+        cost:
+          $ref: '#/components/schemas/CropCost'
+        revenue:
+          type: number
+          minimum: 0
+        status:
+          type: string
+          enum: [planted, growing, flowering, fruiting, harvested, failed]
+        notes:
+          type: string
+          maxLength: 1000
+        location:
+          $ref: '#/components/schemas/Location'
+
+    Market:
+      type: object
+      properties:
+        _id:
+          type: string
+          description: Unique identifier for the market data
+        crop:
+          $ref: '#/components/schemas/MarketCrop'
+        location:
+          $ref: '#/components/schemas/MarketLocation'
+        prices:
+          $ref: '#/components/schemas/MarketPrices'
+        volume:
+          $ref: '#/components/schemas/MarketVolume'
+        quality:
+          $ref: '#/components/schemas/MarketQuality'
+        demand:
+          $ref: '#/components/schemas/MarketDemand'
+        supply:
+          $ref: '#/components/schemas/MarketSupply'
+        seasonality:
+          $ref: '#/components/schemas/MarketSeasonality'
+        dataSource:
+          $ref: '#/components/schemas/MarketDataSource'
+        isActive:
+          type: boolean
+          default: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    MarketCrop:
+      type: object
+      properties:
+        name:
+          type: string
+        variety:
+          type: string
+        type:
+          type: string
+          enum: [vegetable, fruit, grain, legume, herb, spice, other]
+        grade:
+          type: string
+          enum: [A, B, C, premium, standard, commercial]
+          default: standard
+      required: [name, type]
+
+    MarketLocation:
+      type: object
+      properties:
+        market:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        country:
+          type: string
+        coordinates:
+          type: object
+          properties:
+            latitude:
+              type: number
+            longitude:
+              type: number
+      required: [market, city, state, country]
+
+    MarketPrices:
+      type: object
+      properties:
+        wholesale:
+          $ref: '#/components/schemas/PriceRange'
+        retail:
+          $ref: '#/components/schemas/PriceRange'
+
+    PriceRange:
+      type: object
+      properties:
+        min:
+          type: number
+          minimum: 0
+        max:
+          type: number
+          minimum: 0
+        average:
+          type: number
+          minimum: 0
+        unit:
+          type: string
+          enum: [kg, lbs, quintal, ton, piece, dozen, bunch]
+      required: [min, max, average, unit]
+
+    MarketVolume:
+      type: object
+      properties:
+        available:
+          type: number
+          minimum: 0
+        unit:
+          type: string
+          enum: [kg, lbs, quintal, ton, pieces, dozens, bunches]
+
+    MarketQuality:
+      type: object
+      properties:
+        freshness:
+          type: string
+          enum: [excellent, good, fair, poor]
+        appearance:
+          type: string
+          enum: [excellent, good, fair, poor]
+        size:
+          type: string
+          enum: [large, medium, small, mixed]
+
+    MarketDemand:
+      type: object
+      properties:
+        level:
+          type: string
+          enum: [very_high, high, medium, low, very_low]
+        trend:
+          type: string
+          enum: [increasing, stable, decreasing]
+      required: [level, trend]
+
+    MarketSupply:
+      type: object
+      properties:
+        level:
+          type: string
+          enum: [very_high, high, medium, low, very_low]
+        trend:
+          type: string
+          enum: [increasing, stable, decreasing]
+      required: [level, trend]
+
+    MarketSeasonality:
+      type: object
+      properties:
+        isInSeason:
+          type: boolean
+        peakSeason:
+          type: object
+          properties:
+            start:
+              type: string
+              format: date
+            end:
+              type: string
+              format: date
+      required: [isInSeason]
+
+    MarketDataSource:
+      type: object
+      properties:
+        provider:
+          type: string
+        lastUpdated:
+          type: string
+          format: date-time
+        reliability:
+          type: string
+          enum: [high, medium, low]
+          default: medium
+      required: [provider]
+
+    CreateMarketRequest:
+      type: object
+      properties:
+        crop:
+          $ref: '#/components/schemas/MarketCrop'
+        location:
+          $ref: '#/components/schemas/MarketLocation'
+        prices:
+          $ref: '#/components/schemas/MarketPrices'
+        volume:
+          $ref: '#/components/schemas/MarketVolume'
+        quality:
+          $ref: '#/components/schemas/MarketQuality'
+        demand:
+          $ref: '#/components/schemas/MarketDemand'
+        supply:
+          $ref: '#/components/schemas/MarketSupply'
+        seasonality:
+          $ref: '#/components/schemas/MarketSeasonality'
+        dataSource:
+          $ref: '#/components/schemas/MarketDataSource'
+      required: [crop, location, prices, demand, supply, seasonality, dataSource]
+
+    WeatherData:
+      type: object
+      properties:
+        location:
+          type: object
+          properties:
+            latitude:
+              type: number
+            longitude:
+              type: number
+            city:
+              type: string
+            country:
+              type: string
+        current:
+          $ref: '#/components/schemas/WeatherCondition'
+        forecast:
+          type: array
+          items:
+            $ref: '#/components/schemas/WeatherForecast'
+        alerts:
+          type: array
+          items:
+            $ref: '#/components/schemas/WeatherAlert'
+
+    WeatherCondition:
+      type: object
+      properties:
+        temperature:
+          type: number
+        humidity:
+          type: number
+        pressure:
+          type: number
+        windSpeed:
+          type: number
+        windDirection:
+          type: number
+        visibility:
+          type: number
+        uvIndex:
+          type: number
+        condition:
+          type: string
+        description:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+
+    WeatherForecast:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        temperature:
+          type: object
+          properties:
+            min:
+              type: number
+            max:
+              type: number
+            average:
+              type: number
+        humidity:
+          type: number
+        precipitation:
+          type: number
+        windSpeed:
+          type: number
+        condition:
+          type: string
+        description:
+          type: string
+
+    WeatherAlert:
+      type: object
+      properties:
+        type:
+          type: string
+        severity:
+          type: string
+          enum: [low, moderate, severe, extreme]
+        title:
+          type: string
+        description:
+          type: string
+        startTime:
+          type: string
+          format: date-time
+        endTime:
+          type: string
+          format: date-time
+
+    ForumThread:
+      type: object
+      properties:
+        _id:
+          type: string
+          description: Unique identifier for the forum thread
+        title:
+          type: string
+          maxLength: 200
+        content:
+          type: string
+          maxLength: 5000
+        category:
+          type: string
+          enum: [general, crops, weather, market, technology, other]
+          default: general
+        tags:
+          type: array
+          items:
+            type: string
+        author:
+          type: string
+          description: Reference to User ID
+        replies:
+          type: array
+          items:
+            $ref: '#/components/schemas/ForumReply'
+        isPinned:
+          type: boolean
+          default: false
+        isLocked:
+          type: boolean
+          default: false
+        views:
+          type: number
+          default: 0
+        likes:
+          type: number
+          default: 0
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required: [title, content, category, author]
+
+    ForumReply:
+      type: object
+      properties:
+        _id:
+          type: string
+          description: Unique identifier for the reply
+        content:
+          type: string
+          maxLength: 2000
+        author:
+          type: string
+          description: Reference to User ID
+        likes:
+          type: number
+          default: 0
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required: [content, author]
+
+    CreateForumThreadRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+        content:
+          type: string
+          minLength: 1
+          maxLength: 5000
+        category:
+          type: string
+          enum: [general, crops, weather, market, technology, other]
+        tags:
+          type: array
+          items:
+            type: string
+      required: [title, content, category]
+
+    AdminDashboard:
+      type: object
+      properties:
+        totalUsers:
+          type: number
+        totalCrops:
+          type: number
+        totalMarketEntries:
+          type: number
+        totalForumThreads:
+          type: number
+        recentActivity:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+              description:
+                type: string
+              timestamp:
+                type: string
+                format: date-time
+              user:
+                type: string
+        systemHealth:
+          type: object
+          properties:
+            status:
+              type: string
+              enum: [healthy, warning, critical]
+            uptime:
+              type: number
+            memoryUsage:
+              type: number
+            cpuUsage:
+              type: number
+        analytics:
+          type: object
+          properties:
+            userGrowth:
+              type: array
+              items:
+                type: object
+                properties:
+                  date:
+                    type: string
+                    format: date
+                  count:
+                    type: number
+            cropTypes:
+              type: array
+              items:
+                type: object
+                properties:
+                  type:
+                    type: string
+                  count:
+                    type: number
+            marketTrends:
+              type: array
+              items:
+                type: object
+                properties:
+                  crop:
+                    type: string
+                  averagePrice:
+                    type: number
+                  trend:
+                    type: string
+                    enum: [up, down, stable]
+
+tags:
+  - name: Health
+    description: Health check operations
+  - name: Authentication
+    description: User authentication and authorization
+  - name: Crops
+    description: Crop management operations
+  - name: Market
+    description: Market data and pricing information
+  - name: Weather
+    description: Weather data and forecasts
+  - name: Forum
+    description: Community forum operations
+  - name: Admin
+    description: Administrative operations

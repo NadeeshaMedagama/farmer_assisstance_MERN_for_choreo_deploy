@@ -121,6 +121,7 @@ const corsOptions = {
     ? [
         'https://farmer-assistance-frontend.choreo.dev',
         'https://farmer-assistance-api.choreo.dev',
+        'https://b1cab76f-8585-4b1a-ab40-a6bf22735461.e1-us-east-azure.choreoapps.dev/',
         process.env.CORS_ORIGIN
       ].filter(Boolean)
     : process.env.CORS_ORIGIN || '*',
@@ -234,7 +235,7 @@ app.use('/api/admin', (req, res, next) => {
 // Static assets in production
 if ((process.env.NODE_ENV || 'development') === 'production') {
   app.use(express.static(path.join(__dirname, '../frontend/build')));
-  app.get('/*', (req, res) =>
+  app.get('*', (req, res) =>
     res.sendFile(path.resolve(__dirname, '../frontend', 'build', 'index.html'))
   );
 }

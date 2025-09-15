@@ -132,7 +132,7 @@ paths:
                   data:
                     $ref: '#/components/schemas/User'
         '401':
-          description: Unauthorized
+          description: Unauthorized 
     put:
       summary: Update user profile
       tags: [Authentication]

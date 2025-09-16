@@ -117,14 +117,14 @@ app.use(generalLimiter);
 
 // CORS configuration with Choreo-specific origins
 const corsOptions = {
-  // origin: process.env.NODE_ENV === 'production'
-  //   ? [
-  //       'https://farmer-assistance-frontend.choreo.dev',
-  //       'https://farmer-assistance-api.choreo.dev',
-  //       'https://b1cab76f-8585-4b1a-ab40-a6bf22735461.e1-us-east-azure.choreoapps.dev/',
-  //       process.env.CORS_ORIGIN
-  //     ].filter(Boolean)
-  origin: process.env.CORS_ORIGIN || '*',
+  origin: process.env.NODE_ENV === 'production'
+    ? [
+        'https://farmer-assistance-frontend.choreo.dev',
+        'https://farmer-assistance-api.choreo.dev',
+        'https://b1cab76f-8585-4b1a-ab40-a6bf22735461.e1-us-east-azure.choreoapps.dev/',
+        process.env.CORS_ORIGIN
+      ].filter(Boolean)
+  : process.env.CORS_ORIGIN || '*',
   credentials: true,
   optionsSuccessStatus: 200
 };

@@ -1,0 +1,61 @@
+schemaVersion: 1.2
+
+endpoints:
+  - name: farmer-assistance-frontend
+    displayName: Farmer Assistance Frontend
+    service:
+      basePath: /
+      port: 3000
+    type: REST
+    networkVisibilities: 
+      - Public
+      - Organization
+
+dependencies:
+  connectionReferences:
+    - name: farmer-assistance-backend
+      resourceRef: service:/FarmerAssistance/FarmerAssistanceBackend/v1/ad088/PUBLIC
+
+configurations:
+  env:
+    - name: REACT_APP_API_URL
+      valueFrom:
+        connectionRef:
+          name: farmer-assistance-backend
+          key: ServiceURL
+    - name: REACT_APP_ENVIRONMENT
+      valueFrom:
+        configForm:
+            displayName: React App Environment
+            required: true
+            type: string
+    - name: REACT_APP_VERSION
+      valueFrom:
+        configForm:
+            displayName: App Version
+            required: false
+            type: string
+    - name: REACT_APP_WEATHER_API_KEY
+      valueFrom:
+        configForm:
+            displayName: Weather API Key
+            required: false
+            type: secret
+    - name: REACT_APP_GOOGLE_MAPS_API_KEY
+      valueFrom:
+        configForm:
+            displayName: Google Maps API Key
+            required: false
+            type: secret
+    - name: REACT_APP_ENABLE_ANALYTICS
+      valueFrom:
+        configForm:
+            displayName: Enable Analytics
+            required: false
+            type: boolean
+    - name: REACT_APP_DEBUG_MODE
+      valueFrom:
+        configForm:
+            displayName: Debug Mode
+            required: false
+            type: boolean

@@ -1,0 +1,78 @@
+openapi: 3.0.3
+info:
+  title: Farmer Assistance Frontend
+  version: 1.0.0
+  description: React frontend application for Farmer Assistance platform
+
+servers:
+  - url: https://farmer-assistance-frontend.choreo.dev
+    description: Production server
+  - url: http://localhost:3000
+    description: Local development server
+
+paths:
+  /:
+    get:
+      summary: Serve React application
+      tags: [Frontend]
+      responses:
+        '200':
+          description: React application served successfully
+          content:
+            text/html:
+              schema:
+                type: string
+                example: "<!DOCTYPE html><html>...</html>"
+
+  /static/{filename}:
+    get:
+      summary: Serve static assets
+      tags: [Static Assets]
+      parameters:
+        - name: filename
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Static asset filename
+      responses:
+        '200':
+          description: Static asset served successfully
+          content:
+            application/javascript:
+              schema:
+                type: string
+            text/css:
+              schema:
+                type: string
+            image/png:
+              schema:
+                type: string
+                format: binary
+            image/svg+xml:
+              schema:
+                type: string
+
+components:
+  schemas:
+    FrontendConfig:
+      type: object
+      properties:
+        apiUrl:
+          type: string
+          description: Backend API URL
+        environment:
+          type: string
+          description: Application environment
+        version:
+          type: string
+          description: Application version
+        debugMode:
+          type: boolean
+          description: Debug mode enabled
+
+tags:
+  - name: Frontend
+    description: Frontend application routes
+  - name: Static Assets
+    description: Static asset serving

@@ -5,9 +5,9 @@ info:
   description: React frontend application for Farmer Assistance platform
 
 servers:
-  - url: https://farmer-assistance-frontend.choreo.dev
+  - url: https://bfdef01f-7fc1-46ea-af69-42279e15f710-prod-internal.e1-us-east-azure.internal.choreoapis.dev/farmer-assistance/express-mongo-backend/v1
     description: Production server
-  - url: http://localhost:3000
+  - url: https://bfdef01f-7fc1-46ea-af69-42279e15f710-dev-internal.e1-us-east-azure.internal.choreoapis.dev/farmer-assistance/express-mongo-backend/v1
     description: Local development server
 
 paths:

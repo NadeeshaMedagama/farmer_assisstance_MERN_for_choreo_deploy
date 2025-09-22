@@ -4,9 +4,9 @@ info:
   version: 1.0.0
   description: RESTful API for managing farmer assistance services including crop management, market data, weather information, and community features
 servers:
-  - url: https://bfdef01f-7fc1-46ea-af69-42279e15f710-dev-internal.e1-us-east-azure.internal.choreoapis.dev/farmer-assistance/express-mongo-backend/v1
+  - url: https://80998ebd-6133-456b-a5d0-7ad263b0dff9.e1-us-east-azure.choreoapps.dev/
     description: Production server
-  - url: http://localhost:5000
+  - url: https://22d31dbb-6204-4d49-9d3c-0844c48d9a0c.e1-us-east-azure.choreoapps.dev/
     description: Local development server
 paths:
   /health:

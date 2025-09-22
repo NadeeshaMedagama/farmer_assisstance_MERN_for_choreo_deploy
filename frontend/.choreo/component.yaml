@@ -22,6 +22,7 @@ configurations:
       valueFrom:
         connectionRef:
           name: farmer-assistance-backend
+          required: true
           key: ServiceURL
     - name: REACT_APP_ENVIRONMENT
       valueFrom:

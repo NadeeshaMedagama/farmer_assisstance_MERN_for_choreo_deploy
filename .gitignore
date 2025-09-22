@@ -38,3 +38,6 @@ Thumbs.db
 # Build outputs
 build/
 dist/
+
+# Frontend config files
+frontend/public/config.js

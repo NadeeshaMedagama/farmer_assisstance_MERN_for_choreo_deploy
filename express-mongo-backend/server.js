@@ -39,7 +39,6 @@ const weatherRoutes = require('./routes/weather');
 const marketRoutes = require('./routes/market');
 const notificationRoutes = require('./routes/notification');
 const purchaseRoutes = require('./routes/purchase');
-const oidcRoutes = require('./routes/oidc');
 // Additional/new routes
 const contactRoutes = require('./routes/contact');
 const subscribeRouter = require('./routes/subscribe');
@@ -189,7 +188,6 @@ app.use('/api/weather', validateContentType, weatherRoutes);
 app.use('/api/market', marketRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/purchases', purchaseRoutes);
-app.use('/api/oidc', oidcRoutes);
 // Sensitive write operations audit wrappers (examples; expand as needed)
 app.use('/api/orders', (req, res, next) => {
   res.on('finish', () => {

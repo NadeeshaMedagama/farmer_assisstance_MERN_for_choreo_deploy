@@ -1,5 +1,4 @@
 const Notification = require('../models/Notification');
-const emailService = require('./emailService');
 const twilio = require('twilio');
 
 class NotificationService {
@@ -18,10 +17,6 @@ class NotificationService {
 
   async create(payload) {
     const notification = await Notification.create(payload);
-    // Email
-    if (payload.channels?.email?.sent !== false && payload.userEmail) {
-      try { await emailService.sendNotificationEmail(payload.userEmail, payload); } catch {}
-    }
     // SMS
     if (this.twilioClient && payload.channels?.sms?.sent !== false && payload.userPhone) {
       try {

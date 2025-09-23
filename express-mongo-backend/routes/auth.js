@@ -21,7 +21,6 @@ router.post('/login',
   authController.login
 );
 
-router.get('/verify-email', authController.verifyEmail);
 router.post('/forgot-password', body('email').isEmail(), validate, authController.forgotPassword);
 router.post('/reset-password', body('password').isLength({ min: 6 }), validate, authController.resetPassword);
 

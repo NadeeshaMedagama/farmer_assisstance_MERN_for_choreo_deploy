@@ -1,6 +1,5 @@
 const User = require('../models/User');
 const logger = require('../utils/logger');
-const emailService = require('./emailService');
 
 class AuthService {
   // Register a new user
@@ -25,21 +24,6 @@ class AuthService {
         role: role || 'farmer'
       });
 
-      // Generate verification token
-      const verificationToken = require('crypto').randomBytes(32).toString('hex');
-      user.verificationToken = verificationToken;
-      await user.save();
-
-      // Send verification email (skip for testing if no SMTP configured)
-      try {
-        if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
-          await emailService.sendVerificationEmail(user.email, verificationToken);
-        } else {
-          logger.info('Email verification skipped - SMTP not configured');
-        }
-      } catch (emailError) {
-        logger.warn('Email verification failed, but continuing with registration:', emailError.message);
-      }
 
       // Generate JWT token
       const token = user.getSignedJwtToken();
@@ -57,7 +41,6 @@ class AuthService {
           phone: user.phone,
           role: user.role,
           location: user.location,
-          isEmailVerified: user.isVerified,
           createdAt: user.createdAt,
           updatedAt: user.updatedAt
         }
@@ -103,7 +86,6 @@ class AuthService {
           phone: user.phone,
           role: user.role,
           location: user.location,
-          isEmailVerified: user.isVerified,
           createdAt: user.createdAt,
           updatedAt: user.updatedAt,
           lastLogin: user.lastLogin
@@ -111,30 +93,6 @@ class AuthService {
       };
     } catch (error) {
       logger.error('Login error:', error);
-      throw error;
-    }
-  }
-
-  // Verify user email
-  async verifyEmail(token) {
-    try {
-      const user = await User.findOne({ verificationToken: token });
-      if (!user) {
-        throw new Error('Invalid verification token');
-      }
-
-      user.isVerified = true;
-      user.verificationToken = undefined;
-      await user.save();
-
-      logger.info(`User email verified: ${user.email}`);
-
-      return {
-        success: true,
-        message: 'Email verified successfully'
-      };
-    } catch (error) {
-      logger.error('Email verification error:', error);
       throw error;
     }
   }
@@ -150,9 +108,6 @@ class AuthService {
       // Get reset token
       const resetToken = user.getResetPasswordToken();
       await user.save();
-
-      // Send reset email
-      await emailService.sendPasswordResetEmail(user.email, resetToken);
 
       logger.info(`Password reset requested for: ${user.email}`);
 
@@ -254,7 +209,6 @@ class AuthService {
           farmingExperience: user.farmingExperience,
           crops: user.crops,
           avatar: user.avatar,
-          isEmailVerified: user.isVerified,
           preferences: user.preferences,
           createdAt: user.createdAt,
           updatedAt: user.updatedAt,
@@ -276,7 +230,7 @@ class AuthService {
       }
 
       // Remove sensitive fields
-      const { password, email, role, isVerified, ...allowedUpdates } = updateData;
+      const { password, email, role, ...allowedUpdates } = updateData;
 
       // Update user
       Object.keys(allowedUpdates).forEach(key => {
@@ -303,7 +257,6 @@ class AuthService {
           farmSize: user.farmSize,
           farmingExperience: user.farmingExperience,
           avatar: user.avatar,
-          isEmailVerified: user.isVerified,
           preferences: user.preferences,
           createdAt: user.createdAt,
           updatedAt: user.updatedAt

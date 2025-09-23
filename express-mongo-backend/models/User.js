@@ -89,11 +89,6 @@ const UserSchema = new mongoose.Schema({
     type: String,
     default: 'default-avatar.jpg'
   },
-  isVerified: {
-    type: Boolean,
-    default: false
-  },
-  verificationToken: String,
   resetPasswordToken: String,
   resetPasswordExpire: Date,
   lastLogin: Date,

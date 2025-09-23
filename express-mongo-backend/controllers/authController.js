@@ -19,16 +19,6 @@ exports.login = async (req, res, next) => {
   }
 };
 
-exports.verifyEmail = async (req, res, next) => {
-  try {
-    const { token } = req.query;
-    const result = await authService.verifyEmail(token);
-    res.status(200).json(result);
-  } catch (err) {
-    next(err);
-  }
-};
-
 exports.forgotPassword = async (req, res, next) => {
   try {
     const { email } = req.body;
